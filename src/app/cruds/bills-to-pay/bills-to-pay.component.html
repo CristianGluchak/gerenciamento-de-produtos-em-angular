@@ -1,0 +1,158 @@
+<div class="grid">
+    <div class="col-12">
+        <div class="card px-6 py-6">
+            <p-toast></p-toast>
+            <p-toolbar styleClass="mb-4">
+                <ng-template pTemplate="left">
+                    <div class="my-2">
+                        <button pButton pRipple label="Adicionar" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+                        <button pButton pRipple label="Exportar CSV"
+                         icon="pi pi-upload" class="p-button-help"
+                         (click)="dt.exportCSV()"></button>
+                    </div>
+                </ng-template>
+
+                <ng-template pTemplate="right">
+                    <p-fileUpload mode="basic" accept="image/*" [maxFileSize]="1000000" label="Import" chooseLabel="Import" class="mr-2 inline-block"></p-fileUpload>
+                    <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-help" (click)="dt.exportCSV()"></button>
+                </ng-template>
+            </p-toolbar>
+
+            <p-table #dt [value]="items" [columns]="cols" responsiveLayout="scroll" [rows]="10" [globalFilterFields]="['name','documentDate','documentNumber','supplierName', 'amount', 'installmentQuantity', 'dueDate']" [paginator]="true" [rowsPerPageOptions]="[10,20,30]" [showCurrentPageReport]="true" currentPageReportTemplate="Mostrando {first} de {last} do {totalRecords} registros" selectionMode="multiple" [rowHover]="true" dataKey="id">
+                <ng-template pTemplate="caption">
+                    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                        <h5 class="m-0">Contas a pagar</h5>
+                        <span class="block mt-2 md:mt-0 p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Procurar..."  class="w-full sm:w-auto"/>
+                        </span>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th pSortableColumn="name">Nome <p-sortIcon field="name"></p-sortIcon></th>
+                        <th pSortableColumn="price">Data Doc <p-sortIcon field="price"></p-sortIcon></th>
+                        <th pSortableColumn="price">Numero Documento <p-sortIcon field="price"></p-sortIcon></th>
+                        <th pSortableColumn="category">Fornecedor <p-sortIcon field="category"></p-sortIcon></th>
+                        <th pSortableColumn="rating">Total <p-sortIcon field="rating"></p-sortIcon></th>
+                        <th pSortableColumn="inventoryStatus">Qtd Parcela <p-sortIcon field="inventoryStatus"></p-sortIcon></th>
+                        <th pSortableColumn="inventoryStatus">Data Vencimento <p-sortIcon field="inventoryStatus"></p-sortIcon></th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item>
+                    <tr>
+                        <td style="width:14%; min-width:10rem;"><span class="p-column-title">Nome</span>
+                            {{item.name }}
+                        </td>
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Data Doc</span>
+                            {{item.documentDate | date : 'dd/MM/yyyy'}}
+                        </td>
+                        <td style="width:14%; min-width:8rem;">
+                            <span class="p-column-title">Numero Doc</span>
+                            {{item.documentNumber}}
+                        </td>
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Fornecedor</span>
+                            {{item.supplierName}}
+                        </td>
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Total</span>
+                            {{item.amount | currency:'BRL'}}
+                        </td>
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Qtd Parcela</span>
+                            {{item.installmentQuantity}}
+                        </td>
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Data Vencimento</span>
+                            {{item.dueDate | date : 'dd/MM/yyyy'}}
+                        </td>
+
+                        <td>
+                            <div class="flex">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editBillPay(item)"></button>
+                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteBillPay(item)"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <p-dialog [(visible)]="itemDialog" [style]="{width: '450px'}" header="Contas a Pagar" [modal]="true" class="p-fluid">
+            <ng-template pTemplate="content">
+                <form [formGroup]="form" (ngSubmit)="onSaveForm()">
+                <div class="field">
+                    <label for="name">Nome</label>
+                    <input type="text" formControlName="name" placeholder="Digite o nome" pInputText id="name" required autofocus/>
+                    <small *ngIf="!this.form.get('name')?.valid && (this.form.get('name')?.dirty || this.form.get('name')?.touched)" class="ng-dirty ng-invalid">
+                        O campo nome é obrigatório.
+                    </small>
+                </div>
+                <div class="field">
+                    <label for="description">Data do Documento</label>
+                    <input type="date" formControlName="documentDate" placeholder="Digite a data do documento" pInputText id="name" required autofocus/>
+                    <small *ngIf="!this.form.get('documentDate')?.valid && (this.form.get('documentDate')?.dirty || this.form.get('documentDate')?.touched)" class="ng-dirty ng-invalid">
+                        O campo data do documento é obrigatório.
+                    </small>
+                </div>
+                <div class="field">
+                    <label for="name">Numero do Documento</label>
+                    <input type="text" formControlName="documentNumber" placeholder="Digite o numero do documento" pInputText id="name" required autofocus/>
+                    <small *ngIf="!this.form.get('documentNumber')?.valid && (this.form.get('documentNumber')?.dirty || this.form.get('documentNumber')?.touched)" class="ng-dirty ng-invalid">
+                        O campo numero do documento é obrigatório.
+                    </small>
+                </div>
+                <div class="field">
+                    <label for="name">Nome do Fornecedor</label>
+                    <input type="text" formControlName="supplierName" placeholder="Digite o nome do fornecedor" pInputText id="name" required autofocus/>
+                    <small *ngIf="!this.form.get('supplierName')?.valid && (this.form.get('supplierName')?.dirty || this.form.get('supplierName')?.touched)" class="ng-dirty ng-invalid">
+                        O campo nome do fornecedor é obrigatório.
+                    </small>
+                </div>
+                <div class="formgrid grid">
+                    <div class="field col">
+                        <label for="price">Valor</label>
+                        <p-inputNumber id="price" formControlName="amount" placeholder="Digite o valor" mode="currency" currency="BRL" locale="pt-BR"></p-inputNumber>
+                        <small *ngIf="!this.form.get('amount')?.valid && (this.form.get('amount')?.dirty || this.form.get('amount')?.touched)" class="ng-dirty ng-invalid">
+                            O campo valor é obrigatório.
+                        </small>
+                    </div>
+                    <div class="field col">
+                        <label for="quantity">Quantidade de Parcela</label>
+                        <p-inputNumber id="quantity" formControlName="installmentQuantity" placeholder="Digite a quantidade de parcela"></p-inputNumber>
+                        <small *ngIf="!this.form.get('quantity')?.valid && (this.form.get('quantity')?.dirty || this.form.get('quantity')?.touched)" class="ng-dirty ng-invalid">
+                            O campo quantidade de parcela é obrigatório.
+                        </small>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="description">Data de Vencimento</label>
+                    <input type="date" formControlName="dueDate" pInputText id="name" required autofocus/>
+                    <small *ngIf="!this.form.get('dueDate')?.valid && (this.form.get('dueDate')?.dirty || this.form.get('dueDate')?.touched)" class="ng-dirty ng-invalid">
+                        O campo data de vencimento é obrigatório.
+                    </small>
+                </div>
+                </form>
+            </ng-template>
+
+            <ng-template pTemplate="footer">
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+                <button pButton pRipple label="Salvar" icon="pi pi-check" class="p-button-text" (click)="onSaveForm()"></button>
+            </ng-template>
+        </p-dialog>
+
+        <p-dialog [(visible)]="deleteItemDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="item">Você realmente deseja deletar <b>{{item.name}}</b>?</span>
+            </div>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Não" (click)="deleteItemDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Sim" (click)="confirmDeleteBillPay()"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</div>
